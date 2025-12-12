@@ -3,8 +3,31 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../src/context/AuthContext';
 
 export default function RegisterScreen() {
+  const { signUp, isLoading } = useAuth();
+
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleRegister = async () => {
+    if (!fullName || !email || !password) {
+      alert("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    const ok = await signUp(fullName, email, password);
+
+    if (ok) {
+      // signUp bên context đã router.replace('/main')
+      console.log("Đăng ký thành công");
+    } else {
+      alert("Đăng ký thất bại");
+    }
+  };
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -19,21 +42,38 @@ export default function RegisterScreen() {
       <View style={styles.form}>
         <View style={styles.inputContainer}>
           <Ionicons name="person-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput placeholder="Họ và tên" style={styles.input} />
+          <TextInput 
+            placeholder="Họ và tên" 
+            style={styles.input}
+            value={fullName}
+            onChangeText={setFullName}
+          />
         </View>
 
         <View style={styles.inputContainer}>
           <Ionicons name="mail-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput placeholder="Email" style={styles.input} keyboardType="email-address" />
+          <TextInput 
+            placeholder="Email" 
+            style={styles.input} 
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+          />
         </View>
 
         <View style={styles.inputContainer}>
           <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput placeholder="Mật khẩu" style={styles.input} secureTextEntry />
+          <TextInput 
+            placeholder="Mật khẩu" 
+            style={styles.input} 
+            secureTextEntry 
+            value={password}
+            onChangeText={setPassword}
+          />
         </View>
 
-        <TouchableOpacity style={styles.registerBtn} onPress={() => alert('Xử lý đăng ký sau!')}>
-          <Text style={styles.btnText}>Đăng Ký</Text>
+        <TouchableOpacity style={styles.registerBtn} onPress={handleRegister} disabled={isLoading}>
+          <Text style={styles.btnText}>{isLoading ? "Đang đăng ký..." : "Đăng ký"}</Text>
         </TouchableOpacity>
       </View>
 

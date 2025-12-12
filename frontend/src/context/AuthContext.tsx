@@ -1,68 +1,133 @@
 // src/context/AuthContext.tsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { router } from 'expo-router';
+import { Platform } from 'react-native';
 
-// 1. Định nghĩa kiểu dữ liệu cho User
 interface User {
   id: string;
   name: string;
   email: string;
   avatar?: string;
+  role: string;
 }
 
-// 2. Định nghĩa Context có những hàm gì
 interface AuthContextType {
-  user: User | null;        // Thông tin user (null = chưa đăng nhập)
-  isLoading: boolean;       // Trạng thái đang tải (xoay vòng vòng)
-  signIn: (email: string, pass: string) => void;
+  user: User | null;
+  isLoading: boolean;
+  signIn: (email: string, pass: string) => Promise<boolean>;
+  signUp: (full_name: string, email: string, pass: string, role?: string) => Promise<boolean>;
   signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-// 3. Provider bọc toàn bộ App
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // --- MOCK DATA LOGIN ---
-  const signIn = (email: string, pass: string) => {
-    setIsLoading(true);
+  const BACKEND_URL = Platform.OS === 'android'
+    ? 'http://10.0.2.2:5001'
+    : 'http://localhost:5001';
 
-    // Giả lập độ trễ mạng 1 giây (1000ms)
-    setTimeout(() => {
-      // Kiểm tra tài khoản cứng (Mock Data)
-      if (email === "admin@gmail.com" && pass === "123456") {
-        const mockUser: User = {
-          id: "1",
-          name: "Nguyễn Văn Admin",
-          email: email,
-          avatar: "https://i.pravatar.cc/150?img=3"
-        };
-        setUser(mockUser);
-        
-        // Đăng nhập xong thì chuyển về trang Home chính
-        // Lưu ý: Ta sẽ thay 'replace' bằng logic ở _layout.tsx sau này để bảo mật hơn
-        router.replace('/main'); 
-      } else {
-        alert("Sai email hoặc mật khẩu! (Thử: admin@gmail.com / 123456)");
+  // ================================================
+  // LOGIN
+  // ================================================
+  const signIn = async (email: string, pass: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/auth/signin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pass }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || 'Đăng nhập thất bại');
+        return false;
       }
-      
+
+      const u = data.user;
+      const loggedUser: User = {
+        id: u.id,
+        name: u.full_name || u.name || '',
+        email: u.email,
+        avatar: u.avatar,
+        role: u.role || 'user',
+      };
+
+      setUser(loggedUser);
+      router.replace('/main');
+      return true;
+
+    } catch (err: any) {
+      alert('Không thể kết nối server: ' + err.message);
+      return false;
+
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
+  };
+
+  // ================================================
+  // SIGN UP
+  // ================================================
+  const signUp = async (
+    full_name: string,
+    email: string,
+    pass: string,
+    role: string = "user"
+  ): Promise<boolean> => {
+
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ full_name, email, password: pass, role }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Đăng ký thất bại");
+        return false;
+      }
+
+      // Backend trả user luôn
+      const u = data.user;
+      const newUser: User = {
+        id: u.id,
+        name: u.full_name,
+        email: u.email,
+        avatar: u.avatar,
+        role: u.role || "user",
+      };
+
+      setUser(newUser);
+      router.replace('/main');
+      return true;
+
+    } catch (err) {
+      alert("Không thể kết nối server khi đăng ký");
+      return false;
+
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const signOut = () => {
     setUser(null);
-    router.replace('/auth/login'); // Về lại màn hình Welcome
+    router.replace('/auth/login');
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook để dùng nhanh ở các màn hình khác
 export const useAuth = () => useContext(AuthContext);

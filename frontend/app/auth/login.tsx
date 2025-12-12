@@ -14,7 +14,7 @@ export default function LoginScreen() {
     signIn(email, password);
   };
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'android' ? 'padding' : 'height'} style={styles.container}>
       <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
@@ -27,7 +27,7 @@ export default function LoginScreen() {
       <View style={styles.form}>
         <View style={styles.inputContainer}>
           <Ionicons name="mail-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput placeholder="Email" style={styles.input} keyboardType="email-address" />
+          <TextInput placeholder="Email" style={styles.input} keyboardType="email-address" value={email} onChangeText={setEmail} />
         </View>
 
         <View style={styles.inputContainer}>
@@ -35,7 +35,9 @@ export default function LoginScreen() {
           <TextInput 
             placeholder="Mật khẩu" 
             style={styles.input} 
-            secureTextEntry={!showPass} 
+            secureTextEntry={!showPass}
+            value={password}
+            onChangeText={setPassword}
           />
           <TouchableOpacity onPress={() => setShowPass(!showPass)}>
             <Ionicons name={showPass ? "eye-off-outline" : "eye-outline"} size={20} color="#666" />
