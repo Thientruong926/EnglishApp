@@ -24,6 +24,7 @@ export default function MainLayout() {
       <Stack.Screen name="index" options={{ title: 'Danh sách bài học' }} />
       <Stack.Screen name="reading/[id]" options={{ title: 'Đọc hiểu' }} />
       <Stack.Screen name="exercise/[id]" options={{ title: 'Bài tập' }} />
+      <Stack.Screen name="VocabularyRepository/vocabulary" options={{ title: 'Kho Từ Vựng' }} />
     </Stack>
   );
 }

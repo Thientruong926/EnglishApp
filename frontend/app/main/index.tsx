@@ -1,3 +1,5 @@
+//Giao diện chính sau khi đăng nhập
+
 // app/(main)/index.tsx
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, StatusBar } from 'react-native';
@@ -55,7 +57,7 @@ export default function HomeScreen() {
           {/* Nút 1: Kho Từ Vựng */}
           <TouchableOpacity 
             style={styles.actionBtn} 
-            onPress={() => router.push('/main/vocabulary')}
+            onPress={() => router.push('/main/VocabularyRepository/vocabulary')}
             activeOpacity={0.7}
           >
             <View style={[styles.iconCircle, { backgroundColor: '#e3f2fd' }]}>
