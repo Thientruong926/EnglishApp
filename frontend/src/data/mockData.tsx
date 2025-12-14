@@ -99,5 +99,35 @@ export const EXERCISES: Exercise[] = [
   },
 ];
 
-// ... (Các mảng VOCABULARY giữ nguyên như cũ)
-// ... (Các mảng VOCABULARY và EXERCISES giữ nguyên như cũ)
+// Từ vựng theo từng bài học (mock)
+export const VOCABULARIES: Vocabulary[] = [
+  // Lesson 1: Financial Strategies
+  {
+    vocabulary_id: 1,
+    lesson_id: 1,
+    word: "diversification",
+    meaning: "sự đa dạng hóa",
+    ex_sentence: "Diversification reduces risk by spreading investments across different assets."
+  },
+  {
+    vocabulary_id: 2,
+    lesson_id: 1,
+    word: "compound interest",
+    meaning: "lãi suất kép",
+    ex_sentence: "Albert Einstein called compound interest the eighth wonder of the world."
+  },
+  {
+    vocabulary_id: 3,
+    lesson_id: 1,
+    word: "financial strategy",
+    meaning: "chiến lược tài chính",
+    ex_sentence: "A solid financial strategy includes tax planning and an emergency fund."
+  },
+  {
+    vocabulary_id: 4,
+    lesson_id: 1,
+    word: "risk tolerance",
+    meaning: "khả năng chịu rủi ro",
+    ex_sentence: "Understanding your risk tolerance is vital for investment success."
+  },
+];

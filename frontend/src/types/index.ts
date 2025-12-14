@@ -8,11 +8,11 @@ export interface Lesson {
 }
 
 export interface Vocabulary {
-  id: number;
+  vocabulary_id: number;
+  lesson_id: number;
   word: string;
-  pronunciation: string;
   meaning: string;
-  example: string;
+  ex_sentence: string;
 }
 
 export interface Exercise {
