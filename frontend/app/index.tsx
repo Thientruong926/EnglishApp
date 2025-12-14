@@ -1,3 +1,5 @@
+//Màn hình Đăng nhập, Tạo tài khoản mới
+
 // app/index.tsx
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
