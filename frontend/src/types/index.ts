@@ -16,9 +16,10 @@ export interface Vocabulary {
 }
 
 export interface Exercise {
-  id: number;
+  exercise_id: number;
+  lesson_id: number;
   question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
+  type: 'multiple-choice' | 'fill-in' | 'listening' | 'match';
+  options?: string[];
+  correct_answer: string | number;
 }
