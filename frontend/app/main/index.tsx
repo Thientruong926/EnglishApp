@@ -5,6 +5,8 @@ import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet, StatusBar } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useState, useMemo } from 'react';
+import { useSavedLessons } from '../../src/context/SavedLessonsContext';
 
 // Import dữ liệu và context
 import { useAuth } from '../../src/context/AuthContext';
@@ -14,6 +16,17 @@ import { Lesson } from '../../src/types';
 export default function HomeScreen() {
   const { user } = useAuth();
 
+  const [selectedTopic, setSelectedTopic] = useState('All');
+  const topics = useMemo(() => ['All', ...new Set(LESSONS.map(lesson => lesson.topic))], []);
+  const filteredLessons = useMemo(() => {
+    if (selectedTopic === 'All') {
+      return LESSONS;
+    }
+    return LESSONS.filter(lesson => lesson.topic === selectedTopic);
+  }, [selectedTopic]);
+
+  const { toggleSaveLesson, isLessonSaved } = useSavedLessons();
+
   // Render từng item bài học
   const renderLessonItem = ({ item }: { item: Lesson }) => (
     <TouchableOpacity 
@@ -22,6 +35,18 @@ export default function HomeScreen() {
       onPress={() => router.push(`/main/reading/${item.lesson_id}`)}
     >
       <Image source={{ uri: item.image }} style={styles.cardImage} />
+
+      <TouchableOpacity 
+        style={styles.bookmarkBtn} 
+        onPress={() => toggleSaveLesson(item.lesson_id)}
+      >
+        <Ionicons 
+          name={isLessonSaved(item.lesson_id) ? "bookmark" : "bookmark-outline"} 
+          size={24} 
+          color="#fff" 
+        />
+      </TouchableOpacity>
+
       <View style={styles.cardContent}>
         <View style={styles.topicTag}>
           <Text style={styles.topicText}>{item.topic}</Text>
@@ -84,7 +109,7 @@ export default function HomeScreen() {
           {/* Nút 3: Bài đã lưu */}
           <TouchableOpacity 
             style={styles.actionBtn} 
-            onPress={() => router.push('/main/saved-lessons')}
+            onPress={() => router.push('/main/SavedLessons/saved-lessons')}
             activeOpacity={0.7}
           >
             <View style={[styles.iconCircle, { backgroundColor: '#fce4ec' }]}>
@@ -107,11 +132,38 @@ export default function HomeScreen() {
         </View>
       </View>
       {/* ------------------------------------------- */}
+      
+
+      {/*filter*/}
+      <View style={styles.filterContainer}>
+        <FlatList
+          data={topics}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+                style={[
+                    styles.topicButton,
+                    selectedTopic === item && styles.topicButtonSelected
+                ]}
+                onPress={() => setSelectedTopic(item)}
+            >
+                <Text style={[
+                    styles.topicButtonText,
+                    selectedTopic === item && styles.topicButtonTextSelected
+                ]}>
+                    {item}
+                </Text>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        />
+      </View>
+
 
       <Text style={styles.sectionTitle}>Bài học đề xuất</Text>
-      
       <FlatList
-        data={LESSONS}
+        data={filteredLessons}
         keyExtractor={(item) => item.lesson_id.toString()}
         renderItem={renderLessonItem}
         contentContainerStyle={styles.listContainer}
@@ -198,4 +250,39 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#2c3e50', marginBottom: 8, lineHeight: 24 },
   metaInfo: { flexDirection: 'row', alignItems: 'center' },
   timeText: { fontSize: 12, color: '#7f8c8d' },
+
+
+  filterContainer: {
+    marginBottom: 20,
+  },
+  topicButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#e9ecef',
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  topicButtonSelected: {
+    backgroundColor: '#2196f3',
+    borderColor: '#2196f3',
+  },
+  topicButtonText: {
+    color: '#495057',
+    fontWeight: '500',
+  },
+  topicButtonTextSelected: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
+  bookmarkBtn: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        backgroundColor: 'rgba(0,0,0,0.4)',
+        padding: 8,
+        borderRadius: 20,
+    },
 });
