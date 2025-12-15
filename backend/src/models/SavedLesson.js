@@ -7,4 +7,5 @@ const SavedLessonSchema = new mongoose.Schema({
     saved_at: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model("Saved_Lesson", SavedLessonSchema);
+const SavedLesson = mongoose.model("SavedLesson", SavedLessonSchema);
+export default SavedLesson;

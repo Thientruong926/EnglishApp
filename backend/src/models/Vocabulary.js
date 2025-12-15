@@ -1,11 +1,26 @@
 // Vocabulary.js
 import mongoose from "mongoose";
 
-const VocabularySchema = new mongoose.Schema({
-    lesson_id: { type: mongoose.Schema.Types.ObjectId, ref: "Lesson", required: true },
-    word: { type: String, required: true },
-    meaning: { type: String, required: true },
-    ex_sentence: { type: String }
-});
+const VocabularySchema = new mongoose.Schema(
+  {
+    word: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      index: true,
+      unique: true
+    },
+    meaning: {
+      type: String,
+      required: true
+    },
+    example_sentence: {
+      type: String
+    }
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model("Vocabulary", VocabularySchema);
+const Vocabulary = mongoose.model('Vocabulary', VocabularySchema);
+export default Vocabulary;

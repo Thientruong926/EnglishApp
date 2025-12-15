@@ -8,4 +8,5 @@ const LessonSchema = new mongoose.Schema({
     image_url: {type:String}
 }, { timestamps: true });
 
-module.exports = mongoose.model("Lesson", LessonSchema);
+const Lesson =  mongoose.model("Lesson", LessonSchema);
+export default Lesson

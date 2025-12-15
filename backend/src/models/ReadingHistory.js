@@ -1,5 +1,4 @@
-// ReadingHistory.js
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const ReadingHistorySchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -8,4 +7,5 @@ const ReadingHistorySchema = new mongoose.Schema({
     finished_at: { type: Date }
 });
 
-module.exports = mongoose.model("Reading_History", ReadingHistorySchema);
+const ReadingHistory=  mongoose.model("ReadingHistory", ReadingHistorySchema);
+export default ReadingHistory;

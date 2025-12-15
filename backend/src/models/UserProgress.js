@@ -1,5 +1,6 @@
 // UserProgress.js
 import mongoose from "mongoose";
+import User from "./User";
 
 const UserProgressSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -8,4 +9,5 @@ const UserProgressSchema = new mongoose.Schema({
     last_accessed: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model("User_Progress", UserProgressSchema);
+const UserProgress = mongoose.model("UserProgress", UserProgressSchema);
+export default UserProgress;
