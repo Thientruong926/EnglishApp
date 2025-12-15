@@ -1,6 +1,6 @@
 // UserProgress.js
 import mongoose from "mongoose";
-import User from "./User";
+import User from "./User.js";
 
 const UserProgressSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

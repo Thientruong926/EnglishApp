@@ -1,0 +1,569 @@
+{
+    "info": {
+        "name": "EnglishApp API",
+        "description": "API testing for English Learning App",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"user123\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5001/api/auth/register",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5001/api/auth/login",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Lessons",
+            "item": [
+                {
+                    "name": "Get All Lessons",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/lessons",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "lessons"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Lesson by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/lessons/1",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "lessons",
+                                "1"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Lesson",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"lesson_id\": 5,\n  \"topic\": \"Finance\",\n  \"title\": \"Investment Basics\",\n  \"content\": \"Learn about stocks and bonds\",\n  \"image\": \"https://example.com/image.jpg\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5001/api/lessons",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "lessons"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Vocabularies",
+            "item": [
+                {
+                    "name": "Get All Vocabularies",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/vocabularies",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "vocabularies"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Vocabulary",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"word\": \"dividend\",\n  \"meaning\": \"Tiền lợi tức\",\n  \"ex_sentence\": \"The company paid a dividend to shareholders\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5001/api/vocabularies",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "vocabularies"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Exercises",
+            "item": [
+                {
+                    "name": "Get All Exercises",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/exercises",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "exercises"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Exercises by Lesson",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/exercises/lesson/1",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "exercises",
+                                "lesson",
+                                "1"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Exercise",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"lesson_id\": 1,\n  \"question\": \"What is compound interest?\",\n  \"type\": \"multiple_choice\",\n  \"options\": [\"Interest on interest\", \"Simple interest\", \"No interest\"],\n  \"correct_answer\": \"Interest on interest\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5001/api/exercises",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "exercises"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Lesson Vocabularies",
+            "item": [
+                {
+                    "name": "Get All Lesson Vocabularies",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/lesson-vocabularies",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "lesson-vocabularies"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Vocabularies by Lesson",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/lesson-vocabularies/lesson/1",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "lesson-vocabularies",
+                                "lesson",
+                                "1"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Lesson Vocabulary",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"lesson_id\": 1,\n  \"vocabulary_id\": 1\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5001/api/lesson-vocabularies",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "lesson-vocabularies"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Reading Histories",
+            "item": [
+                {
+                    "name": "Get All Reading Histories",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/reading-histories",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "reading-histories"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Reading Histories by User",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/reading-histories/user/user_id",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "reading-histories",
+                                "user",
+                                "user_id"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Reading History",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"user_id\": \"user123\",\n  \"lesson_id\": 1,\n  \"read_date\": \"2025-12-15\",\n  \"time_spent\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5001/api/reading-histories",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "reading-histories"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User Progresses",
+            "item": [
+                {
+                    "name": "Get All User Progresses",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/user-progresses",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "user-progresses"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Progress by User",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/user-progresses/user/user_id",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "user-progresses",
+                                "user",
+                                "user_id"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create User Progress",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"user_id\": \"user123\",\n  \"lesson_id\": 1,\n  \"completed\": true\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5001/api/user-progresses",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "user-progresses"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Saved Lessons",
+            "item": [
+                {
+                    "name": "Get All Saved Lessons",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/saved-lessons",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "saved-lessons"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User Exercises",
+            "item": [
+                {
+                    "name": "Get All User Exercises",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/user-exercises",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "user-exercises"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User Folders",
+            "item": [
+                {
+                    "name": "Get All User Folders",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/user-folders",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "user-folders"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User Vocabularies",
+            "item": [
+                {
+                    "name": "Get All User Vocabularies",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:5001/api/user-vocabularies",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "5001",
+                            "path": [
+                                "api",
+                                "user-vocabularies"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

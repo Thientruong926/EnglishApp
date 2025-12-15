@@ -2,7 +2,7 @@ import express from "express";
 import {
      submitExercise,
     getUserExerciseResults
-} from "../controllers/userexcerciseController.js";
+} from "../controllers/userexerciseController.js";
 
 const router = express.Router();
 

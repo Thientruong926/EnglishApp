@@ -2,7 +2,9 @@ import express from "express";
 import {
     createVocabulary,
     getAllVocabulary,
-    getVocabularyById
+    getVocabularyById,
+    updateVocabulary,
+    deleteVocabulary
 } from "../controllers/vocabularyController.js";
 
 

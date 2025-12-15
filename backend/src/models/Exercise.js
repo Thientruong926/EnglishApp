@@ -9,4 +9,4 @@ const ExerciseSchema = new mongoose.Schema({
     correct_answer: { type: mongoose.Schema.Types.Mixed, required: true },
 });
 
-module.exports = mongoose.model("Exercise", ExerciseSchema);
+export default mongoose.model("Exercise", ExerciseSchema);
