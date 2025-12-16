@@ -98,7 +98,7 @@ const LessonsListScreen = () => {
                         style={styles.editButton}
                         onPress={() =>
                             router.push({
-                                pathname: '/admin/edit-lesson',
+                                pathname: '/main/admin/lesson/edit-lesson',
                                 params: { id: item._id },
                             })
                         }
@@ -142,7 +142,7 @@ const LessonsListScreen = () => {
             />
             <TouchableOpacity
                 style={styles.fab}
-                onPress={() => router.push('/admin/add-lesson')}
+                onPress={() => router.push('/main/admin/lesson/add-lesson')}
             >
                 <Ionicons name="add" size={28} color="#fff" />
             </TouchableOpacity>
