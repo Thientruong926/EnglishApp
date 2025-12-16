@@ -54,7 +54,7 @@ const AddLessonScreen = () => {
                         setTopic('');
                         setContent('');
                         setImageUrl('');
-                        router.push('/admin/lessons-list');
+                        router.push('/main/admin/lessons-list');
                     },
                 },
             ]);

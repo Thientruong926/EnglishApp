@@ -114,7 +114,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={styles.actionBtn}
             onPress={() =>
-              router.push('/main/VocabularyRepository/vocabulary')
+              router.push('/main/user/VocabularyRepository/vocabulary')
             }
           >
             <View style={[styles.iconCircle, { backgroundColor: '#e3f2fd' }]}>

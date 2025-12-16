@@ -15,7 +15,7 @@ const AdminDashboard = () => {
             <View style={styles.menuSection}>
                 <TouchableOpacity
                     style={[styles.menuCard, styles.addCard]}
-                    onPress={() => router.push('/admin/add-lesson')}
+                    onPress={() => router.push('/main/admin/add-lesson')}
                 >
                     <Ionicons name="add-circle-outline" size={40} color="#27ae60" />
                     <Text style={styles.menuTitle}>Thêm Bài Học</Text>
@@ -24,7 +24,7 @@ const AdminDashboard = () => {
 
                 <TouchableOpacity
                     style={[styles.menuCard, styles.editCard]}
-                    onPress={() => router.push('/admin/lessons-list')}
+                    onPress={() => router.push('/main/admin/lessons-list')}
                 >
                     <Ionicons name="pencil-outline" size={40} color="#f39c12" />
                     <Text style={styles.menuTitle}>Chỉnh Sửa/Xóa Bài</Text>

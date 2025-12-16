@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, JSX } from 'react';
+import React, { useEffect, useState, JSX } from 'react';
 import {
   View,
   Text,
@@ -9,18 +9,25 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   GestureResponderEvent,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useLessonVocabulary } from '../../../../src/context/LessonVocabularyContext';
+import { useVocabulary, Vocabulary } from '../../../../src/context/VocabularyContext';
+import { Lesson, useLesson } from '../../../../src/context/LessonContext';
+import { useUserFolder, UserFolder } from '../../../../src/context/UserFolderContext';
+import { useAuth } from '@/src/context/AuthContext';
+import { useUserVocabulary } from '@/src/context/UserVocabularyContext';
 
-import { Lesson } from '../../../../src/context/LessonContext';
-import { useLesson } from '../../../../src/context/LessonContext';
-
-/* =========================
-   COMPONENT
-========================= */
 export default function ReadingDetail() {
+  const { user } = useAuth();
+  const user_id = user?.id; // lấy user_id từ AuthContext
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getLessonById } = useLesson();
+  const { fetchVocabsByLesson } = useLessonVocabulary();
+  const { vocabs: allVocabs } = useVocabulary();
+  const { folders, fetchFolders } = useUserFolder();
+  const { addUserVocab } = useUserVocabulary();
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [vocabs, setVocabs] = useState<Vocabulary[]>([]);
@@ -29,58 +36,60 @@ export default function ReadingDetail() {
   const [canStartExercise, setCanStartExercise] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
-  const [selectionPoint, setSelectionPoint] = useState<{
-    x: number;
-    y: number;
-    initialScrollY: number;
-  } | null>(null);
+  const [selectionPoint, setSelectionPoint] = useState<{ x: number; y: number; initialScrollY: number } | null>(null);
+  const [showFolderSelector, setShowFolderSelector] = useState<{ vocab: Vocabulary } | null>(null);
 
-  /* =========================
-     FETCH DATA FROM API
-  ========================= */
+  // Fetch lesson + vocabs + folders
   useEffect(() => {
-    if (!id) return;
+    if (!id || Array.isArray(id)) return;
+    if (!user_id) return; // chờ user load
 
-    const fetchLesson = async () => {
+    const fetchData = async () => {
       setLoading(true);
-      const data = await getLessonById(id);
+      try {
+        const lessonData = await getLessonById(id);
+        if (lessonData) {
+          setLesson(lessonData);
 
-      if (data) {
-        setLesson(data);
-        setVocabs(data.vocabularies || []);
+          // Fetch vocab cho bài học
+          const lessonVocabLinks = await fetchVocabsByLesson(id);
+          const lessonVocabs = lessonVocabLinks
+            .map((lv: any) =>
+              typeof lv.vocab_id === 'object' && lv.vocab_id !== null
+                ? lv.vocab_id
+                : allVocabs.find(v => v._id === lv.vocab_id)
+            )
+            .filter(Boolean) as Vocabulary[];
+
+          setVocabs(lessonVocabs);
+        }
+
+        // Fetch folder của user
+        await fetchFolders();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
-    fetchLesson();
-  }, [id]);
+    fetchData();
+  }, [id, allVocabs, user_id]);
 
-  /* =========================
-     SCROLL CHECK
-  ========================= */
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
     setScrollY(contentOffset.y);
 
     const threshold = 24;
-    const isAtBottom =
-      contentOffset.y + layoutMeasurement.height >=
-      contentSize.height - threshold;
-
-    if (isAtBottom) setCanStartExercise(true);
+    if (contentOffset.y + layoutMeasurement.height >= contentSize.height - threshold) {
+      setCanStartExercise(true);
+    }
   };
 
-  /* =========================
-     RENDER CONTENT WITH HIGHLIGHT
-  ========================= */
+  // Highlight từ trong đoạn văn
   const renderHighlightedParagraph = (text: string, index: number) => {
     const vocabWords = vocabs.map(v => v.word.toLowerCase());
-
-    const vocabPattern =
-      vocabWords.length > 0
-        ? new RegExp(`\\b(${vocabWords.join('|')})\\b`, 'gi')
-        : null;
+    const vocabPattern = vocabWords.length > 0 ? new RegExp(`\\b(${vocabWords.join('|')})\\b`, 'gi') : null;
 
     const parts: JSX.Element[] = [];
     let lastIndex = 0;
@@ -97,24 +106,16 @@ export default function ReadingDetail() {
         }
 
         const word = match[0];
-        const isSelected =
-          selectedWord?.toLowerCase() === word.toLowerCase();
+        const isSelected = selectedWord?.toLowerCase() === word.toLowerCase();
 
         parts.push(
           <Text
             key={`w-${index}-${match.index}`}
-            style={[
-              styles.highlightedWord,
-              isSelected && styles.selectedWord,
-            ]}
+            style={[styles.highlightedWord, isSelected && styles.selectedWord]}
             onLongPress={(e: GestureResponderEvent) => {
               const { pageX, pageY } = e.nativeEvent;
               setSelectedWord(word);
-              setSelectionPoint({
-                x: pageX,
-                y: pageY - 32,
-                initialScrollY: scrollY,
-              });
+              setSelectionPoint({ x: pageX, y: pageY - 32, initialScrollY: scrollY });
             }}
           >
             {word}
@@ -135,28 +136,44 @@ export default function ReadingDetail() {
 
     return (
       <Text style={{ marginBottom: 12 }}>
-        {parts}
+        {parts.map((part, idx) => React.cloneElement(part, { key: part.key || idx }))}
       </Text>
     );
   };
 
-  const parseParagraphs = (html: string): string[] => {
-    return html
-      .replace(/\r?\n|\r/g, '') // bỏ newline
+  const parseParagraphs = (html: string): string[] =>
+    html
+      .replace(/\r?\n|\r/g, '')
       .split(/<\/p>/i)
-      .map(p =>
-        p
-          .replace(/<p[^>]*>/i, '')
-          .replace(/<\/?[^>]+(>|$)/g, '')
-          .trim()
-      )
+      .map(p => p.replace(/<p[^>]*>/i, '').replace(/<\/?[^>]+(>|$)/g, '').trim())
       .filter(Boolean);
+
+  // Xử lý thêm từ vựng
+  const handleAddVocab = (vocab: Vocabulary) => {
+    if (folders.length === 0) {
+      Alert.alert("Chưa có folder nào", "Vui lòng tạo folder trước khi thêm từ vựng.");
+      return;
+    }
+    setShowFolderSelector({ vocab });
   };
 
+  const selectFolder = async (folder: UserFolder) => {
+    if (!showFolderSelector) return;
+    const vocab = showFolderSelector.vocab;
 
-  /* =========================
-     UI STATES
-  ========================= */
+    try {
+      // ✅ Chỉ truyền vocab_id và folder_id
+      await addUserVocab(vocab._id, folder._id);
+      Alert.alert("Thành công", `Đã thêm "${vocab.word}" vào folder "${folder.name}"`);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Lỗi", "Không thể thêm từ vào folder");
+    }
+
+    setShowFolderSelector(null);
+    setSelectedWord(null);
+  };
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -173,9 +190,6 @@ export default function ReadingDetail() {
     );
   }
 
-  /* =========================
-     RENDER
-  ========================= */
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
@@ -192,11 +206,8 @@ export default function ReadingDetail() {
         </View>
 
         <View style={styles.content}>
-          {parseParagraphs(lesson.content).map((para, index) =>
-            renderHighlightedParagraph(para, index)
-          )}
+          {parseParagraphs(lesson.content).map((para, index) => renderHighlightedParagraph(para, index))}
         </View>
-
 
         {vocabs.length > 0 && (
           <View style={styles.vocabSection}>
@@ -206,10 +217,15 @@ export default function ReadingDetail() {
                 <Text style={styles.vocabWord}>{v.word}</Text>
                 <Text>{v.meaning}</Text>
                 {v.example_sentence && (
-                  <Text style={styles.vocabExample}>
-                    Ví dụ: {v.example_sentence}
-                  </Text>
+                  <Text style={styles.vocabExample}>Ví dụ: {v.example_sentence}</Text>
                 )}
+
+                <TouchableOpacity
+                  style={styles.addButtonSmall}
+                  onPress={() => handleAddVocab(v)}
+                >
+                  <Text style={{ color: '#fff' }}>＋</Text>
+                </TouchableOpacity>
               </View>
             ))}
           </View>
@@ -218,117 +234,80 @@ export default function ReadingDetail() {
         <View style={styles.footer}>
           <TouchableOpacity
             disabled={!canStartExercise}
-            style={[
-              styles.ctaBtn,
-              !canStartExercise && styles.ctaBtnDisabled,
-            ]}
-            onPress={() =>
-              router.push(`/main/user/exercise/${lesson._id}`)
-            }
+            style={[styles.ctaBtn, !canStartExercise && styles.ctaBtnDisabled]}
+            onPress={() => router.push(`/main/user/exercise/${lesson._id}`)}
           >
             <Text style={styles.ctaText}>
-              {canStartExercise
-                ? 'Làm bài tập'
-                : 'Kéo xuống hết để làm bài'}
+              {canStartExercise ? 'Làm bài tập' : 'Kéo xuống hết để làm bài'}
             </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
-      {selectionPoint && (
-        <View
-          style={[
-            styles.addContainer,
-            {
-              top:
-                selectionPoint.y -
-                (scrollY - selectionPoint.initialScrollY),
-              left: selectionPoint.x - 24,
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => {
-              setSelectionPoint(null);
-              setSelectedWord(null);
-            }}
-          >
-            <Text style={styles.addButtonText}>＋</Text>
-          </TouchableOpacity>
-          <Text style={styles.addHint}>Thêm từ vựng</Text>
+      {showFolderSelector && (
+        <View style={styles.folderSelectorOverlay}>
+          <View style={styles.folderSelector}>
+            <Text style={{ fontWeight: '700', marginBottom: 8 }}>Chọn folder để lưu</Text>
+            {folders.map(f => (
+              <TouchableOpacity key={f._id} onPress={() => selectFolder(f)} style={styles.folderOption}>
+                <Text>📁 {f.name}</Text>
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity onPress={() => setShowFolderSelector(null)} style={{ marginTop: 12 }}>
+              <Text style={{ color: '#e74c3c', fontWeight: '700' }}>Hủy</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </View>
   );
 }
 
-/* =========================
-   STYLES
-========================= */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
   cover: { width: '100%', height: 220 },
   meta: { padding: 16, backgroundColor: '#fff' },
   topic: { color: '#2196f3', fontSize: 12, fontWeight: '700' },
   title: { fontSize: 22, fontWeight: 'bold', marginTop: 6 },
-
-  content: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-  },
-
+  content: { paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' },
   body: { fontSize: 16, lineHeight: 24, color: '#34495e' },
-  highlightedWord: {
-    color: '#2196f3',
-    fontWeight: '700',
-    backgroundColor: '#e3f2fd',
-  },
-  selectedWord: {
-    backgroundColor: '#1976d2',
-    color: '#fff',
-  },
-
+  highlightedWord: { color: '#2196f3', fontWeight: '700', backgroundColor: '#e3f2fd' },
+  selectedWord: { backgroundColor: '#1976d2', color: '#fff' },
   vocabSection: { padding: 16, backgroundColor: '#fff' },
   vocabTitle: { fontSize: 18, fontWeight: '700', marginBottom: 10 },
-  vocabCard: {
-    backgroundColor: '#f0f7ff',
-    padding: 10,
-    borderRadius: 6,
-    marginBottom: 10,
-  },
+  vocabCard: { backgroundColor: '#f0f7ff', padding: 10, borderRadius: 6, marginBottom: 10 },
   vocabWord: { fontWeight: '700', color: '#2196f3' },
   vocabExample: { fontStyle: 'italic', marginTop: 4 },
-
-  footer: { padding: 16 },
-  ctaBtn: {
-    backgroundColor: '#27ae60',
-    padding: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  ctaBtnDisabled: { backgroundColor: '#a5d6a7' },
-  ctaText: { color: '#fff', fontWeight: '700' },
-
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  error: { color: '#e74c3c' },
-
-  addContainer: { position: 'absolute', flexDirection: 'row', gap: 8 },
-  addButton: {
+  addButtonSmall: {
     backgroundColor: '#2196f3',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addButtonText: { color: '#fff', fontSize: 20 },
-  addHint: {
-    backgroundColor: '#fff',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
-    fontSize: 12,
+    alignSelf: 'flex-start',
+    marginTop: 6,
+  },
+  footer: { padding: 16 },
+  ctaBtn: { backgroundColor: '#27ae60', padding: 12, borderRadius: 10, alignItems: 'center' },
+  ctaBtnDisabled: { backgroundColor: '#a5d6a7' },
+  ctaText: { color: '#fff', fontWeight: '700' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  error: { color: '#e74c3c' },
+  folderSelectorOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  folderSelector: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    width: '80%',
+  },
+  folderOption: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
 });

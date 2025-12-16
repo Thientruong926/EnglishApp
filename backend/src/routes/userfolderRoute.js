@@ -10,7 +10,6 @@ const router = express.Router();
 
 // CREATE
 router.post("/", createFolder);
-
 // READ
 router.get("/", getUserFolders);
 router.delete("/", deleteFolder);

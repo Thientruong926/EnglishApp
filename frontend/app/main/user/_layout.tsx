@@ -3,18 +3,24 @@ import { Stack } from 'expo-router';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { useAuth } from '../../../src/context/AuthContext';
+import { AuthProvider, useAuth } from '../../../src/context/AuthContext';
 import { LessonProvider } from '../../../src/context/LessonContext';
 import { SavedLessonsProvider } from '../../../src/context/SavedLessonsContext';
 import { ExerciseProvider } from '@/src/context/ExcerciseContext';
+import { LessonVocabularyProvider } from '@/src/context/LessonVocabularyContext';
+import { UserVocabularyProvider } from '@/src/context/UserVocabularyContext';
+import { UserFolderProvider } from '@/src/context/UserFolderContext';
 
 export default function MainLayout() {
   const { signOut } = useAuth();
 
   return (
-    <LessonProvider>
-      <SavedLessonsProvider>
-        <ExerciseProvider>
+<LessonProvider>
+  <UserVocabularyProvider>
+    <UserFolderProvider>
+      <LessonVocabularyProvider>
+        <SavedLessonsProvider>
+          <ExerciseProvider>
         <Stack
           screenOptions={{
             headerStyle: { backgroundColor: '#fff' },
@@ -33,8 +39,11 @@ export default function MainLayout() {
           <Stack.Screen name="VocabularyRepository/vocabulary" options={{ title: 'Kho Từ Vựng' }} />
           <Stack.Screen name="SavedLessons/saved-lessons" options={{ title: 'Bài Đã Lưu' }} />
         </Stack>
-        </ExerciseProvider>
-      </SavedLessonsProvider>
-    </LessonProvider>
+ </ExerciseProvider>
+        </SavedLessonsProvider>
+      </LessonVocabularyProvider>
+    </UserFolderProvider>
+  </UserVocabularyProvider>
+</LessonProvider>
   );
 }
