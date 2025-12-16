@@ -3,9 +3,9 @@ import { Stack } from 'expo-router';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { useAuth } from '../../src/context/AuthContext';
-import { LessonProvider } from '../../src/context/LessonContext';
-import { SavedLessonsProvider } from '../../src/context/SavedLessonsContext';
+import { useAuth } from '../../../src/context/AuthContext';
+import { LessonProvider } from '../../../src/context/LessonContext';
+import { SavedLessonsProvider } from '../../../src/context/SavedLessonsContext';
 import { ExerciseProvider } from '@/src/context/ExcerciseContext';
 
 export default function MainLayout() {

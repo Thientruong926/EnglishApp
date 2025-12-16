@@ -13,9 +13,9 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { useAuth } from '../../src/context/AuthContext';
-import { useSavedLessons } from '../../src/context/SavedLessonsContext';
-import { useLesson, Lesson } from '../../src/context/LessonContext';
+import { useAuth } from '../../../src/context/AuthContext';
+import { useSavedLessons } from '../../../src/context/SavedLessonsContext';
+import { useLesson, Lesson } from '../../../src/context/LessonContext';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -53,7 +53,7 @@ export default function HomeScreen() {
     <TouchableOpacity
       style={styles.card}
       activeOpacity={0.9}
-      onPress={() => router.push(`/main/reading/${item._id}`)}
+      onPress={() => router.push(`/main/user/reading/${item._id}`)}
     >
       {item.image_url && (
         <Image source={{ uri: item.image_url }} style={styles.cardImage} />
@@ -137,7 +137,7 @@ export default function HomeScreen() {
         <View style={styles.actionRow}>
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => router.push('/main/SavedLessons/saved-lessons')}
+            onPress={() => router.push('/main/user/SavedLessons/saved-lessons')}
           >
             <View style={[styles.iconCircle, { backgroundColor: '#fce4ec' }]}>
               <Ionicons name="bookmark" size={22} color="#e91e63" />

@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useExercise } from '../../../src/context/ExcerciseContext';
-import { Exercise } from '../../../src/types';
+import { useExercise } from '../../../../src/context/ExcerciseContext';
+import { Exercise } from '../../../../src/types';
 
 export default function ExerciseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();

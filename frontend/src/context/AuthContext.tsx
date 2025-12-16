@@ -20,6 +20,13 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const redirectByRole = (role: string) => {
+  if (role === 'admin') {
+    router.replace('/main/admin'); // trỏ đến layout admin index
+  } else {
+    router.replace('/main/user'); // trỏ đến layout user index
+  }
+};
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);

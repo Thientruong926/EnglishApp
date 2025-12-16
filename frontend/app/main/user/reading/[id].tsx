@@ -12,8 +12,8 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 
-import { Lesson } from '../../../src/context/LessonContext';
-import { useLesson } from '../../../src/context/LessonContext';
+import { Lesson } from '../../../../src/context/LessonContext';
+import { useLesson } from '../../../../src/context/LessonContext';
 
 /* =========================
    COMPONENT
@@ -223,7 +223,7 @@ export default function ReadingDetail() {
               !canStartExercise && styles.ctaBtnDisabled,
             ]}
             onPress={() =>
-              router.push(`/main/exercise/${lesson._id}`)
+              router.push(`/main/user/exercise/${lesson._id}`)
             }
           >
             <Text style={styles.ctaText}>

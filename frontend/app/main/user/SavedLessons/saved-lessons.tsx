@@ -29,7 +29,7 @@ const LessonItem = ({
 }: LessonItemProps) => (
   <TouchableOpacity
     style={styles.card}
-    onPress={() => router.push(`/main/reading/${item._id}`)}
+    onPress={() => router.push(`/main/user/reading/${item._id}`)}
   >
     {item.image_url && (
       <Image source={{ uri: item.image_url }} style={styles.cardImage} />
