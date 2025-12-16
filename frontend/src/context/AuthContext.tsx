@@ -65,7 +65,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       };
 
       setUser(loggedUser);
-      router.replace('/main');
+
+    // ✅ ĐIỀU HƯỚNG THEO ROLE
+    redirectByRole(loggedUser.role);
+
       return true;
 
     } catch (err: any) {
