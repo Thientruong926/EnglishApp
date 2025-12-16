@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { VOCABULARIES } from '../../../src/data/mockData';
 import { Vocabulary } from '../../../src/types';
 import { Ionicons } from '@expo/vector-icons';
 
