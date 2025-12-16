@@ -40,93 +40,93 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // LOGIN
   // ================================================
   const signIn = async (email: string, pass: string): Promise<boolean> => {
-    setIsLoading(true);
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/signin`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: pass }),
-      });
+  setIsLoading(true);
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/auth/signin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pass }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        alert(data.message || 'Đăng nhập thất bại');
-        return false;
-      }
+    if (!res.ok) {
+      alert(data.message || 'Đăng nhập thất bại');
+      return false;
+    }
 
-      const u = data.user;
-      const loggedUser: User = {
-        id: u.id,
-        name: u.full_name || u.name || '',
-        email: u.email,
-        avatar: u.avatar,
-        role: u.role || 'user',
-      };
+    const u = data.user;
 
-      setUser(loggedUser);
+    const loggedUser: User = {
+      id: u.id,
+      name: u.full_name || u.name || '',
+      email: u.email,
+      avatar: u.avatar,
+      role: u.role || 'user',
+    };
+
+    setUser(loggedUser);
 
     // ✅ ĐIỀU HƯỚNG THEO ROLE
     redirectByRole(loggedUser.role);
 
-      return true;
+    return true;
+  } catch (err: any) {
+    alert('Không thể kết nối server: ' + err.message);
+    return false;
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    } catch (err: any) {
-      alert('Không thể kết nối server: ' + err.message);
-      return false;
-
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // ================================================
   // SIGN UP
   // ================================================
-  const signUp = async (
-    full_name: string,
-    email: string,
-    pass: string,
-    role: string = "user"
-  ): Promise<boolean> => {
+ const signUp = async (
+  full_name: string,
+  email: string,
+  pass: string,
+  role: string = "user"
+): Promise<boolean> => {
+  setIsLoading(true);
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ full_name, email, password: pass, role }),
+    });
 
-    setIsLoading(true);
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ full_name, email, password: pass, role }),
-      });
+    const data = await res.json();
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Đăng ký thất bại");
-        return false;
-      }
-
-      // Backend trả user luôn
-      const u = data.user;
-      const newUser: User = {
-        id: u.id,
-        name: u.full_name,
-        email: u.email,
-        avatar: u.avatar,
-        role: u.role || "user",
-      };
-
-      setUser(newUser);
-      router.replace('/main');
-      return true;
-
-    } catch (err) {
-      alert("Không thể kết nối server khi đăng ký");
+    if (!res.ok) {
+      alert(data.message || "Đăng ký thất bại");
       return false;
-
-    } finally {
-      setIsLoading(false);
     }
-  };
+
+    const u = data.user;
+
+    const newUser: User = {
+      id: u.id,
+      name: u.full_name,
+      email: u.email,
+      avatar: u.avatar,
+      role: u.role || "user",
+    };
+
+    setUser(newUser);
+
+    // ✅ DÙNG ROLE CỦA newUser
+    redirectByRole(newUser.role);
+
+    return true;
+  } catch (err) {
+    alert("Không thể kết nối server khi đăng ký");
+    return false;
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const signOut = () => {
     setUser(null);
