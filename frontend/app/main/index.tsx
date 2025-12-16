@@ -29,21 +29,21 @@ export default function HomeScreen() {
 
   // Render từng item bài học
   const renderLessonItem = ({ item }: { item: Lesson }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.card}
       activeOpacity={0.9}
       onPress={() => router.push(`/main/reading/${item.lesson_id}`)}
     >
       <Image source={{ uri: item.image }} style={styles.cardImage} />
 
-      <TouchableOpacity 
-        style={styles.bookmarkBtn} 
+      <TouchableOpacity
+        style={styles.bookmarkBtn}
         onPress={() => toggleSaveLesson(item.lesson_id)}
       >
-        <Ionicons 
-          name={isLessonSaved(item.lesson_id) ? "bookmark" : "bookmark-outline"} 
-          size={24} 
-          color="#fff" 
+        <Ionicons
+          name={isLessonSaved(item.lesson_id) ? "bookmark" : "bookmark-outline"}
+          size={24}
+          color="#fff"
         />
       </TouchableOpacity>
 
@@ -63,16 +63,24 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#f8f9fa" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Xin chào, {user?.name || "Bạn mới"} 👋</Text>
           <Text style={styles.subGreeting}>Hôm nay bạn muốn học gì?</Text>
         </View>
-        {user?.avatar && (
-          <Image source={{ uri: user.avatar }} style={styles.avatar} />
-        )}
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            onPress={() => router.push('/admin')}
+            style={styles.adminButton}
+          >
+            <Ionicons name="settings" size={20} color="#2980b9" />
+          </TouchableOpacity>
+          {user?.avatar && (
+            <Image source={{ uri: user.avatar }} style={styles.avatar} />
+          )}
+        </View>
       </View>
 
       {/* --- MENU CHỨC NĂNG (GRID 2x2) --- */}
@@ -80,8 +88,8 @@ export default function HomeScreen() {
         {/* Hàng 1 */}
         <View style={styles.actionRow}>
           {/* Nút 1: Kho Từ Vựng */}
-          <TouchableOpacity 
-            style={styles.actionBtn} 
+          <TouchableOpacity
+            style={styles.actionBtn}
             onPress={() => router.push('/main/VocabularyRepository/vocabulary')}
             activeOpacity={0.7}
           >
@@ -92,8 +100,8 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           {/* Nút 2: Ôn tập */}
-          <TouchableOpacity 
-            style={styles.actionBtn} 
+          <TouchableOpacity
+            style={styles.actionBtn}
             onPress={() => router.push('/main/practice')}
             activeOpacity={0.7}
           >
@@ -107,8 +115,8 @@ export default function HomeScreen() {
         {/* Hàng 2 */}
         <View style={styles.actionRow}>
           {/* Nút 3: Bài đã lưu */}
-          <TouchableOpacity 
-            style={styles.actionBtn} 
+          <TouchableOpacity
+            style={styles.actionBtn}
             onPress={() => router.push('/main/SavedLessons/saved-lessons')}
             activeOpacity={0.7}
           >
@@ -119,8 +127,8 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           {/* Nút 4: Thêm từ */}
-          <TouchableOpacity 
-            style={styles.actionBtn} 
+          <TouchableOpacity
+            style={styles.actionBtn}
             onPress={() => router.push('/main/add-word')}
             activeOpacity={0.7}
           >
@@ -132,7 +140,7 @@ export default function HomeScreen() {
         </View>
       </View>
       {/* ------------------------------------------- */}
-      
+
 
       {/*filter*/}
       <View style={styles.filterContainer}>
@@ -140,18 +148,18 @@ export default function HomeScreen() {
           data={topics}
           renderItem={({ item }) => (
             <TouchableOpacity
-                style={[
-                    styles.topicButton,
-                    selectedTopic === item && styles.topicButtonSelected
-                ]}
-                onPress={() => setSelectedTopic(item)}
+              style={[
+                styles.topicButton,
+                selectedTopic === item && styles.topicButtonSelected
+              ]}
+              onPress={() => setSelectedTopic(item)}
             >
-                <Text style={[
-                    styles.topicButtonText,
-                    selectedTopic === item && styles.topicButtonTextSelected
-                ]}>
-                    {item}
-                </Text>
+              <Text style={[
+                styles.topicButtonText,
+                selectedTopic === item && styles.topicButtonTextSelected
+              ]}>
+                {item}
+              </Text>
             </TouchableOpacity>
           )}
           keyExtractor={(item) => item}
@@ -178,13 +186,15 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa', paddingHorizontal: 20 },
-  
+
   // Header
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, marginBottom: 20 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  adminButton: { padding: 8 },
   greeting: { fontSize: 22, fontWeight: 'bold', color: '#2c3e50' },
   subGreeting: { fontSize: 14, color: '#7f8c8d', marginTop: 4 },
   avatar: { width: 45, height: 45, borderRadius: 22.5, borderWidth: 2, borderColor: '#fff' },
-  
+
   // --- STYLE CHO MENU GRID 2x2 (Đã sửa lại) ---
   actionContainer: {
     marginBottom: 20,
@@ -209,20 +219,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // Icon bên trái, chữ bên phải
     alignItems: 'center', // Căn giữa theo chiều dọc
   },
-  
+
   // Style chung cho vòng tròn Icon
   iconCircle: {
-    width: 38, 
-    height: 38, 
+    width: 38,
+    height: 38,
     borderRadius: 12, // Bo góc mềm mại hơn (squircle) thay vì tròn xoe
-    justifyContent: 'center', 
+    justifyContent: 'center',
     alignItems: 'center',
     marginRight: 10, // Khoảng cách với chữ
   },
-  
-  actionTitle: { 
-    fontSize: 13, 
-    fontWeight: '600', 
+
+  actionTitle: {
+    fontSize: 13,
+    fontWeight: '600',
     color: '#333',
     flex: 1, // Để chữ tự xuống dòng nếu dài quá
   },
@@ -233,15 +243,15 @@ const styles = StyleSheet.create({
   emptyText: { textAlign: 'center', marginTop: 20, color: '#999' },
 
   // Card Bài học
-  card: { 
-    backgroundColor: '#fff', 
-    borderRadius: 16, 
-    marginBottom: 20, 
-    shadowColor: '#000', 
-    shadowOffset: { width: 0, height: 4 }, 
-    shadowOpacity: 0.1, 
-    shadowRadius: 8, 
-    elevation: 4 
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4
   },
   cardImage: { width: '100%', height: 180, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
   cardContent: { padding: 16 },
@@ -278,11 +288,11 @@ const styles = StyleSheet.create({
   },
 
   bookmarkBtn: {
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        backgroundColor: 'rgba(0,0,0,0.4)',
-        padding: 8,
-        borderRadius: 20,
-    },
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    padding: 8,
+    borderRadius: 20,
+  },
 });
