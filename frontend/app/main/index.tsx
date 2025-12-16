@@ -95,9 +95,17 @@ export default function HomeScreen() {
           </Text>
           <Text style={styles.subGreeting}>Hôm nay bạn muốn học gì?</Text>
         </View>
-        {user?.avatar && (
-          <Image source={{ uri: user.avatar }} style={styles.avatar} />
-        )}
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            onPress={() => router.push('/admin')}
+            style={styles.adminButton}
+          >
+            <Ionicons name="settings" size={20} color="#2980b9" />
+          </TouchableOpacity>
+          {user?.avatar && (
+            <Image source={{ uri: user.avatar }} style={styles.avatar} />
+          )}
+        </View>
       </View>
 
       {/* MENU */}
