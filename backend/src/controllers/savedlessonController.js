@@ -2,7 +2,7 @@
 import SavedLesson from "../models/SavedLesson.js";
 
 export const saveLesson = async (req, res) => {
-    try {
+  try {
     const { user_id, lesson_id } = req.body;
 
     if (!user_id || !lesson_id) {
@@ -18,16 +18,15 @@ export const saveLesson = async (req, res) => {
       message: "Lưu lesson thành công",
       saved,
     });
-    } catch (error) {
+  } catch (error) {
     return res.status(500).json({
       message: "Lỗi server",
       error: error.message,
     });
-    }
+  }
 };
-
 export const getSavedLessons = async (req, res) => {
-    try {
+  try {
     const { user_id } = req.query;
 
     if (!user_id) {
@@ -35,13 +34,13 @@ export const getSavedLessons = async (req, res) => {
     }
 
     const lessons = await SavedLesson.find({ user_id })
-            .populate("lesson_id");
+      .populate("lesson_id");
 
-        return res.status(200).json(lessons);
-    } catch (error) {
+    return res.status(200).json(lessons);
+  } catch (error) {
     return res.status(500).json({
       message: "Lỗi server",
       error: error.message,
     });
-    }
+  }
 };
