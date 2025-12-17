@@ -135,18 +135,27 @@ export default function ReadingDetail() {
     }
 
     return (
-      <Text style={{ marginBottom: 12 }}>
+      <Text key={`para-${index}`} style={styles.paragraph}>
         {parts.map((part, idx) => React.cloneElement(part, { key: part.key || idx }))}
       </Text>
     );
   };
 
-  const parseParagraphs = (html: string): string[] =>
-    html
-      .replace(/\r?\n|\r/g, '')
-      .split(/<\/p>/i)
-      .map(p => p.replace(/<p[^>]*>/i, '').replace(/<\/?[^>]+(>|$)/g, '').trim())
+  const parseParagraphs = (html: string): string[] => {
+    // Nếu có thẻ <p>, xử lý HTML
+    if (/<p[^>]*>/i.test(html)) {
+      return html
+        .split(/<\/p>/i)
+        .map(p => p.replace(/<p[^>]*>/i, '').replace(/<\/?[^>]+(>|$)/g, '').trim())
+        .filter(Boolean);
+    }
+
+    // Nếu không có thẻ HTML, tách theo xuống dòng
+    return html
+      .split(/\n\n+/)  // Tách theo 2 xuống dòng trở lên (đoạn văn)
+      .map(p => p.trim())
       .filter(Boolean);
+  };
 
   // Xử lý thêm từ vựng
   const handleAddVocab = (vocab: Vocabulary) => {
@@ -270,6 +279,12 @@ const styles = StyleSheet.create({
   topic: { color: '#2196f3', fontSize: 12, fontWeight: '700' },
   title: { fontSize: 22, fontWeight: 'bold', marginTop: 6 },
   content: { paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff' },
+  paragraph: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#34495e',
+    marginBottom: 12,
+  },
   body: { fontSize: 16, lineHeight: 24, color: '#34495e' },
   highlightedWord: { color: '#2196f3', fontWeight: '700', backgroundColor: '#e3f2fd' },
   selectedWord: { backgroundColor: '#1976d2', color: '#fff' },
