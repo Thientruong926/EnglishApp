@@ -10,6 +10,7 @@ import { ExerciseProvider } from '@/src/context/ExcerciseContext';
 import { LessonVocabularyProvider } from '@/src/context/LessonVocabularyContext';
 import { UserVocabularyProvider } from '@/src/context/UserVocabularyContext';
 import { UserFolderProvider } from '@/src/context/UserFolderContext';
+import { UserExerciseProvider } from '@/src/context/UserExerciseContext';
 
 export default function MainLayout() {
   const { signOut } = useAuth();
@@ -18,6 +19,7 @@ export default function MainLayout() {
 <LessonProvider>
   <UserVocabularyProvider>
     <UserFolderProvider>
+           <UserExerciseProvider>
       <LessonVocabularyProvider>
         <SavedLessonsProvider>
           <ExerciseProvider>
@@ -42,6 +44,7 @@ export default function MainLayout() {
  </ExerciseProvider>
         </SavedLessonsProvider>
       </LessonVocabularyProvider>
+ </UserExerciseProvider>
     </UserFolderProvider>
   </UserVocabularyProvider>
 </LessonProvider>

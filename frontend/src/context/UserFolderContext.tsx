@@ -91,34 +91,60 @@ export const UserFolderProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // Thêm từ vựng vào folder của user
-  const addUserVocab = async (folder_id: string, vocab: Vocabulary) => {
-    if (!user_id) return;
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/user-folders/${folder_id}/vocabularies`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id, vocab_id: vocab._id }),
-      });
-      if (!res.ok) throw new Error("Không thể thêm từ vào folder");
+// Trong UserFolderContext.tsx
+// Trong UserFolderContext.tsx
+const addUserVocab = async (folder_id: string, vocab: Vocabulary) => {
+  if (!user_id) {
+    console.warn("User chưa login, không thể thêm từ");
+    return;
+  }
 
-      // Cập nhật local state, tránh trùng lặp
-      setFolders(prev =>
-        prev.map(f =>
-          f._id === folder_id
-            ? { 
-                ...f, 
-                vocabularies: f.vocabularies?.some(v => v._id === vocab._id)
-                  ? f.vocabularies
-                  : [...(f.vocabularies || []), vocab]
-              }
-            : f
-        )
-      );
-    } catch (err) {
-      console.error("Lỗi thêm từ vựng vào folder:", err);
-      Alert.alert("Lỗi", "Không thể thêm từ vựng vào folder");
+  if (!vocab._id || !folder_id) {
+    console.warn("Thiếu vocab_id hoặc folder_id");
+    return;
+  }
+
+  try {
+    console.log("Adding vocab to folder:", { user_id, vocab_id: vocab._id, folder_id });
+
+    const res = await fetch(`${BACKEND_URL}/api/user-folders/${folder_id}/vocabularies`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id, vocab_id: vocab._id, folder_id }), // ✅ gửi đủ
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("Lỗi API addUserVocab:", data);
+      Alert.alert("Lỗi", data.message || "Không thể thêm từ vựng vào folder");
+      return;
     }
-  };
+
+    // Cập nhật state local
+    setFolders(prev =>
+      prev.map(f =>
+        f._id === folder_id
+          ? {
+              ...f,
+              vocabularies: f.vocabularies?.some(v => v._id === vocab._id)
+                ? f.vocabularies
+                : [...(f.vocabularies || []), vocab],
+            }
+          : f
+      )
+    );
+
+    console.log("Thêm từ thành công:", vocab.word);
+  } catch (err) {
+    console.error("Lỗi fetch addUserVocab:", err);
+    Alert.alert("Lỗi", "Không thể thêm từ vựng vào folder");
+  }
+};
+
+
+
+
 
   // Auto-fetch khi mount
   useEffect(() => {

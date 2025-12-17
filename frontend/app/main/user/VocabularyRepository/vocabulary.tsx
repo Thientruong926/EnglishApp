@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Vocabulary } from '../../../../src/context/VocabularyContext';
 import { useUserFolder, UserFolder } from '../../../../src/context/UserFolderContext';
-import { useUserVocabulary } from '../../../../src/context/UserVocabularyContext';
 import { useAuth } from '../../../../src/context/AuthContext';
 
 // Component hiển thị từ vựng
@@ -66,18 +65,18 @@ export default function VocabularyScreen() {
   const { user } = useAuth();
   const user_id = user?.id;
 
-  const { folders, createFolder, fetchFolders, deleteFolder } = useUserFolder();
-  const { userVocabs } = useUserVocabulary();
+  const { folders, createFolder, deleteFolder } = useUserFolder();
 
   const [newFolderName, setNewFolderName] = useState('');
   const [showInput, setShowInput] = useState(false);
   const [openedFolderId, setOpenedFolderId] = useState<string | null>(null);
 
-useEffect(() => {
-  if (!user?.id) return; // tránh fetch khi user chưa login
-  fetchFolders();
-}, [user?.id]);
+  // Toggle folder
+  const handleToggleFolder = (folder_id: string) => {
+    setOpenedFolderId(prev => (prev === folder_id ? null : folder_id));
+  };
 
+  // Create folder
   const handleCreateFolder = async () => {
     if (!newFolderName.trim() || !user_id) return;
     await createFolder(newFolderName.trim());
@@ -85,36 +84,19 @@ useEffect(() => {
     setShowInput(false);
   };
 
+  // Delete folder
   const handleDeleteFolder = async (folder_id: string) => {
     if (!user_id) return;
     await deleteFolder(folder_id);
     if (openedFolderId === folder_id) setOpenedFolderId(null);
   };
 
-const handleToggleFolder = (folder_id: string | number) => {
-  const id = String(folder_id);
-  setOpenedFolderId(prev => (prev === id ? null : id));
-  console.log('Opened folderId set to:', id);
-};
-
-
-  // Lọc vocab theo folder đang mở (fix crash khi folder_id là string hoặc object)
-const openedFolderVocabs = React.useMemo(() => {
-
-
-  if (!openedFolderId || !userVocabs?.length) return [];
-  console.log("openedFolderId:", openedFolderId);
-  console.log("userVocabs:", userVocabs);
-
-  return userVocabs.filter(uv => {
-    console.log('uv.folder_id:', uv.folder_id);
-    if (!uv.folder_id) return false;
-    if (typeof uv.folder_id === 'string') return uv.folder_id === openedFolderId;
-    if (typeof uv.folder_id === 'object') return uv.folder_id._id === openedFolderId;
-    return false;
-  });
-}, [openedFolderId, userVocabs]);
-
+  // Lấy danh sách vocab trong folder mở
+  const openedFolderVocabs = useMemo(() => {
+    if (!openedFolderId || !folders.length) return [];
+    const folder = folders.find(f => f._id === openedFolderId);
+    return folder?.vocabularies || [];
+  }, [openedFolderId, folders]);
 
   return (
     <View style={styles.container}>
@@ -132,8 +114,8 @@ const openedFolderVocabs = React.useMemo(() => {
             />
             {openedFolderId === item._id && openedFolderVocabs.length > 0 && (
               <View style={{ paddingLeft: 16, marginTop: 4 }}>
-                {openedFolderVocabs.map(uv => (
-                  <VocabularyItem key={uv._id} item={uv.vocab_id} />
+                {openedFolderVocabs.map(vocab => (
+                  <VocabularyItem key={vocab._id} item={vocab} />
                 ))}
               </View>
             )}

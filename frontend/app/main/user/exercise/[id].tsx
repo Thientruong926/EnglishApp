@@ -1,15 +1,15 @@
 // app/main/exercise/[id].tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useExercise } from '../../../../src/context/ExcerciseContext';
-import { Exercise } from '../../../../src/types';
 
 export default function ExerciseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -17,19 +17,20 @@ export default function ExerciseScreen() {
 
   const { exercises, fetchExercisesByLesson, isLoading } = useExercise();
 
-  /* =========================
-     STATE
-  ========================= */
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState<{ correct: number; total: number } | null>(null);
+  const [history, setHistory] = useState<{ score: number; date: string }[]>([]);
 
   /* =========================
      FETCH EXERCISES
   ========================= */
   useEffect(() => {
-    if (lessonId) {
-      fetchExercisesByLesson(lessonId);
-    }
+    const fetchData = async () => {
+      if (!lessonId) return;
+      await fetchExercisesByLesson(lessonId);
+    };
+    fetchData();
   }, [lessonId]);
 
   /* =========================
@@ -44,24 +45,25 @@ export default function ExerciseScreen() {
      SUBMIT
   ========================= */
   const handleSubmit = () => {
-    setSubmitted(true);
-  };
-
-  /* =========================
-     SCORE
-  ========================= */
-  const score = useMemo(() => {
-    if (!submitted) return null;
+    if (!exercises.length) return;
 
     let correct = 0;
     exercises.forEach(ex => {
-      if (answers[ex._id] === ex.correct_answer) {
-        correct++;
-      }
+      if (answers[ex._id] === ex.correct_answer) correct++;
     });
 
-    return { correct, total: exercises.length };
-  }, [submitted, exercises, answers]);
+    const total = exercises.length;
+    const percentScore = Math.round((correct / total) * 100);
+
+    setScore({ correct, total });
+    setSubmitted(true);
+
+    // Thêm vào lịch sử local
+    setHistory(prev => [
+      ...prev,
+      { score: percentScore, date: new Date().toLocaleDateString() },
+    ]);
+  };
 
   /* =========================
      GUARDS
@@ -77,6 +79,7 @@ export default function ExerciseScreen() {
   if (isLoading) {
     return (
       <View style={styles.center}>
+        <ActivityIndicator size="large" color="#2196f3" />
         <Text>Đang tải bài tập...</Text>
       </View>
     );
@@ -85,43 +88,33 @@ export default function ExerciseScreen() {
   if (!exercises.length) {
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>
-          Chưa có bài tập cho bài học này
-        </Text>
+        <Text style={styles.error}>Chưa có bài tập cho bài học này</Text>
       </View>
     );
   }
+
+  const optionLabels = ['A', 'B', 'C', 'D'];
 
   /* =========================
      RENDER
   ========================= */
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={{ paddingBottom: 24 }}
-    >
-      <View style={styles.header}>
-        <Text style={styles.title}>Bài tập</Text>
-        <Text style={styles.sub}>
-          {exercises.length} câu hỏi
-        </Text>
-      </View>
-
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
       {exercises.map((ex, idx) => (
         <View key={ex._id} style={styles.card}>
           <Text style={styles.qIndex}>Câu {idx + 1}</Text>
           <Text style={styles.question}>{ex.question}</Text>
 
           <View style={{ marginTop: 10 }}>
-            {ex.options?.map(opt => {
-              const chosen = answers[ex._id] === opt;
-              const isCorrect = submitted && opt === ex.correct_answer;
-              const isWrong =
-                submitted && chosen && !isCorrect;
+            {ex.options?.map((opt, optIdx) => {
+              const label = optionLabels[optIdx];
+              const chosen = answers[ex._id] === label;
+              const isCorrect = submitted && label === ex.correct_answer;
+              const isWrong = submitted && chosen && !isCorrect;
 
               return (
                 <TouchableOpacity
-                  key={opt}
+                  key={label}
                   activeOpacity={0.8}
                   style={[
                     styles.option,
@@ -129,9 +122,11 @@ export default function ExerciseScreen() {
                     isCorrect && styles.optionCorrect,
                     isWrong && styles.optionWrong,
                   ]}
-                  onPress={() => handleChoose(ex._id, opt)}
+                  onPress={() => handleChoose(ex._id, label)}
                 >
-                  <Text style={styles.optionText}>{opt}</Text>
+                  <Text style={styles.optionText}>
+                    {label}: {opt}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
@@ -152,11 +147,24 @@ export default function ExerciseScreen() {
           score && (
             <View style={styles.resultBox}>
               <Text style={styles.resultText}>
-                Kết quả: {score.correct}/{score.total} câu đúng
+                Kết quả: {score.correct}/{score.total} câu đúng ({Math.round((score.correct / score.total) * 100)}%)
               </Text>
             </View>
           )
         )}
+      </View>
+
+      {/* =========================
+          HISTORY BÀI HỌC LOCAL
+      ========================= */}
+      <View style={styles.historySection}>
+        <Text style={styles.historyTitle}>📖 Kết quả bài này</Text>
+        {history.map((h, idx) => (
+          <View key={idx} style={styles.historyCard}>
+            <Text>Điểm: {h.score}%</Text>
+            <Text>Ngày: {h.date}</Text>
+          </View>
+        ))}
       </View>
     </ScrollView>
   );
@@ -167,16 +175,8 @@ export default function ExerciseScreen() {
 ========================= */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 16 },
   error: { color: '#e74c3c', fontSize: 16 },
-
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 8,
-  },
-  title: { fontSize: 22, fontWeight: 'bold', color: '#2c3e50' },
-  sub: { color: '#7f8c8d', marginTop: 6 },
 
   card: {
     backgroundColor: '#fff',
@@ -186,11 +186,7 @@ const styles = StyleSheet.create({
     padding: 14,
     elevation: 2,
   },
-  qIndex: {
-    color: '#2196f3',
-    fontWeight: '700',
-    marginBottom: 8,
-  },
+  qIndex: { color: '#2196f3', fontWeight: '700', marginBottom: 8 },
   question: { fontSize: 16, color: '#2c3e50' },
 
   option: {
@@ -203,16 +199,10 @@ const styles = StyleSheet.create({
   optionChosen: { backgroundColor: '#bbdefb' },
   optionCorrect: { backgroundColor: '#c8e6c9' },
   optionWrong: { backgroundColor: '#ffcdd2' },
-
   optionText: { color: '#34495e' },
 
   footer: { paddingHorizontal: 16, paddingVertical: 16 },
-  submitBtn: {
-    backgroundColor: '#27ae60',
-    borderRadius: 10,
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
+  submitBtn: { backgroundColor: '#27ae60', borderRadius: 10, alignItems: 'center', paddingVertical: 12 },
   submitText: { color: '#fff', fontWeight: '700' },
 
   resultBox: {
@@ -220,6 +210,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: 'center',
+    marginBottom: 12,
   },
   resultText: { color: '#2c3e50', fontWeight: '700' },
+
+  historySection: { paddingHorizontal: 16, marginTop: 20 },
+  historyTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
+  historyCard: { backgroundColor: '#f0f7ff', padding: 12, borderRadius: 8, marginBottom: 10 },
 });

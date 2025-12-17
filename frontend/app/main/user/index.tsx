@@ -147,13 +147,14 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => router.push('/main/add-word')}
+            onPress={() => router.push('/main/user/History/lesson-history')} // đổi đường dẫn thành trang lịch sử
           >
             <View style={[styles.iconCircle, { backgroundColor: '#e8f5e9' }]}>
-              <Ionicons name="add-circle" size={22} color="#27ae60" />
+              <Ionicons name="time" size={22} color="#27ae60" /> {/* đổi icon từ add-circle sang time */}
             </View>
-            <Text style={styles.actionTitle}>Thêm từ mới</Text>
+            <Text style={styles.actionTitle}>Lịch sử làm bài</Text>
           </TouchableOpacity>
+
         </View>
       </View>
 

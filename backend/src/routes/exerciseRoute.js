@@ -15,7 +15,7 @@ const router = express.Router();
 router.post("/", createExercise);
 
 // READ
-router.get("/", getAllExercises);
+router.get("/lesson/:lesson_id", getExercisesByLessonId);
 router.get("/:id", getExerciseById);
 router.get("/lesson/:lesson_id", getExercisesByLessonId);
 
