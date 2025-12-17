@@ -9,19 +9,68 @@ export default function RegisterScreen() {
   const { signUp, isLoading } = useAuth();
 
   const [fullName, setFullName] = useState('');
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+
+  const validateFullName = (name: string): string => {
+    if (!name.trim()) return 'Vui lòng nhập họ và tên';
+    if (name.trim().length < 2) return 'Họ và tên phải có ít nhất 2 ký tự';
+    if (name.trim().length > 50) return 'Họ và tên không được vượt quá 50 ký tự';
+    if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(name.trim())) return 'Họ và tên chỉ được chứa chữ cái';
+    return '';
+  };
+
+  const validateEmail = (email: string): string => {
+    if (!email.trim()) return 'Vui lòng nhập email';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) return 'Email không đúng định dạng';
+    return '';
+  };
+
+  const validatePassword = (password: string): string => {
+    if (!password) return 'Vui lòng nhập mật khẩu';
+    if (password.length < 8) return 'Mật khẩu phải có ít nhất 8 ký tự';
+    if (!/(?=.*[a-z])/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ thường';
+    if (!/(?=.*[A-Z])/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ hoa';
+    if (!/(?=.*\d)/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 chữ số';
+    if (!/(?=.*[@$!%*?&#])/.test(password)) return 'Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (@$!%*?&#)';
+    return '';
+  };
+
+  const validateConfirmPassword = (confirm: string, original: string): string => {
+    if (!confirm) return 'Vui lòng xác nhận mật khẩu';
+    if (confirm !== original) return 'Mật khẩu xác nhận không khớp';
+    return '';
+  };
 
   const handleRegister = async () => {
-    if (!fullName || !email || !password) {
-      alert("Vui lòng nhập đầy đủ thông tin");
+    // Validate tất cả các trường
+    const newErrors = {
+      fullName: validateFullName(fullName),
+      email: validateEmail(email),
+      password: validatePassword(password),
+      confirmPassword: validateConfirmPassword(confirmPassword, password)
+    };
+
+    setErrors(newErrors);
+
+    // Nếu có lỗi, không tiếp tục
+    if (Object.values(newErrors).some(error => error !== '')) {
       return;
     }
 
-    const ok = await signUp(fullName, email, password);
+    const ok = await signUp(fullName.trim(), email.trim(), password);
 
     if (ok) {
-      // signUp bên context đã router.replace('/main')
       console.log("Đăng ký thành công");
     } else {
       alert("Đăng ký thất bại");
@@ -40,36 +89,80 @@ export default function RegisterScreen() {
       </View>
 
       <View style={styles.form}>
-        <View style={styles.inputContainer}>
-          <Ionicons name="person-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput 
-            placeholder="Họ và tên" 
-            style={styles.input}
-            value={fullName}
-            onChangeText={setFullName}
-          />
+        <View>
+          <View style={[styles.inputContainer, errors.fullName && styles.inputError]}>
+            <Ionicons name="person-outline" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              placeholder="Họ và tên"
+              style={styles.input}
+              value={fullName}
+              onChangeText={(text) => {
+                setFullName(text);
+                setErrors(prev => ({ ...prev, fullName: '' }));
+              }}
+            />
+          </View>
+          {errors.fullName ? <Text style={styles.errorText}>{errors.fullName}</Text> : null}
         </View>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput 
-            placeholder="Email" 
-            style={styles.input} 
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-          />
+        <View>
+          <View style={[styles.inputContainer, errors.email && styles.inputError]}>
+            <Ionicons name="mail-outline" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              placeholder="Email"
+              style={styles.input}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                setErrors(prev => ({ ...prev, email: '' }));
+              }}
+            />
+          </View>
+          {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
         </View>
 
-        <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.icon} />
-          <TextInput 
-            placeholder="Mật khẩu" 
-            style={styles.input} 
-            secureTextEntry 
-            value={password}
-            onChangeText={setPassword}
-          />
+        <View>
+          <View style={[styles.inputContainer, errors.password && styles.inputError]}>
+            <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              placeholder="Mật khẩu (min 8 ký tự, chữ hoa, số, ký tự đặc biệt)"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                setErrors(prev => ({ ...prev, password: '' }));
+              }}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#666" />
+            </TouchableOpacity>
+          </View>
+          {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
+        </View>
+
+        <View>
+          <View style={[styles.inputContainer, errors.confirmPassword && styles.inputError]}>
+            <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.icon} />
+            <TextInput
+              placeholder="Xác nhận mật khẩu"
+              style={styles.input}
+              secureTextEntry={!showConfirmPassword}
+              autoCapitalize="none"
+              value={confirmPassword}
+              onChangeText={(text) => {
+                setConfirmPassword(text);
+                setErrors(prev => ({ ...prev, confirmPassword: '' }));
+              }}
+            />
+            <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+              <Ionicons name={showConfirmPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#666" />
+            </TouchableOpacity>
+          </View>
+          {errors.confirmPassword ? <Text style={styles.errorText}>{errors.confirmPassword}</Text> : null}
         </View>
 
         <TouchableOpacity style={styles.registerBtn} onPress={handleRegister} disabled={isLoading}>
@@ -94,10 +187,20 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: 'bold', color: '#333' },
   subtitle: { fontSize: 16, color: '#888', marginTop: 8 },
   form: { flex: 1 },
-  inputContainer: { 
-    flexDirection: 'row', alignItems: 'center', 
-    borderWidth: 1, borderColor: '#eee', borderRadius: 12, 
-    paddingHorizontal: 16, height: 56, marginBottom: 16, backgroundColor: '#fafafa' 
+  inputContainer: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderColor: '#eee', borderRadius: 12,
+    paddingHorizontal: 16, height: 56, marginBottom: 4, backgroundColor: '#fafafa'
+  },
+  inputError: {
+    borderColor: '#e74c3c',
+    borderWidth: 1.5,
+  },
+  errorText: {
+    color: '#e74c3c',
+    fontSize: 12,
+    marginBottom: 12,
+    marginLeft: 4,
   },
   icon: { marginRight: 12 },
   input: { flex: 1, fontSize: 16 },
