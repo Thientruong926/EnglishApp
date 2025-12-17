@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useExercise } from '../../../../src/context/ExcerciseContext';
@@ -106,30 +107,56 @@ export default function ExerciseScreen() {
           <Text style={styles.question}>{ex.question}</Text>
 
           <View style={{ marginTop: 10 }}>
-            {ex.options?.map((opt, optIdx) => {
-              const label = optionLabels[optIdx];
-              const chosen = answers[ex._id] === label;
-              const isCorrect = submitted && label === ex.correct_answer;
-              const isWrong = submitted && chosen && !isCorrect;
+            {ex.type === 'multiple-choice' ? (
+              // Bài tập trắc nghiệm
+              ex.options?.map((opt, optIdx) => {
+                const label = optionLabels[optIdx];
+                const chosen = answers[ex._id] === label;
+                const isCorrect = submitted && label === ex.correct_answer;
+                const isWrong = submitted && chosen && !isCorrect;
 
-              return (
-                <TouchableOpacity
-                  key={label}
-                  activeOpacity={0.8}
+                return (
+                  <TouchableOpacity
+                    key={label}
+                    activeOpacity={0.8}
+                    style={[
+                      styles.option,
+                      chosen && styles.optionChosen,
+                      isCorrect && styles.optionCorrect,
+                      isWrong && styles.optionWrong,
+                    ]}
+                    onPress={() => handleChoose(ex._id, label)}
+                  >
+                    <Text style={styles.optionText}>
+                      {label}: {opt}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })
+            ) : (
+              // Bài tập điền từ
+              <>
+                <TextInput
                   style={[
-                    styles.option,
-                    chosen && styles.optionChosen,
-                    isCorrect && styles.optionCorrect,
-                    isWrong && styles.optionWrong,
+                    styles.fillInInput,
+                    submitted && answers[ex._id] === ex.correct_answer && styles.fillInInputCorrect,
+                    submitted && answers[ex._id] !== ex.correct_answer && answers[ex._id] && styles.fillInInputWrong,
                   ]}
-                  onPress={() => handleChoose(ex._id, label)}
-                >
-                  <Text style={styles.optionText}>
-                    {label}: {opt}
+                  placeholder="Nhập câu trả lời..."
+                  value={answers[ex._id] || ''}
+                  onChangeText={(text) => !submitted && handleChoose(ex._id, text)}
+                  editable={!submitted}
+                  placeholderTextColor="#999"
+                />
+                {submitted &&
+                answers[ex._id] &&
+                answers[ex._id] !== ex.correct_answer && (
+                  <Text style={styles.correctAnswerText}>
+                    Đáp án đúng: {ex.correct_answer}
                   </Text>
-                </TouchableOpacity>
-              );
-            })}
+                )}
+              </>
+            )}
           </View>
         </View>
       ))}
@@ -200,6 +227,33 @@ const styles = StyleSheet.create({
   optionCorrect: { backgroundColor: '#c8e6c9' },
   optionWrong: { backgroundColor: '#ffcdd2' },
   optionText: { color: '#34495e' },
+
+  fillInInput: {
+    backgroundColor: '#f0f2f5',
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    marginTop: 8,
+    fontSize: 16,
+    color: '#2c3e50',
+    borderWidth: 1,
+    borderColor: '#bdc3c7',
+  },
+  fillInInputCorrect: {
+    backgroundColor: '#c8e6c9',
+    borderColor: '#27ae60',
+  },
+  fillInInputWrong: {
+    backgroundColor: '#ffcdd2',
+    borderColor: '#e74c3c',
+  },
+  correctAnswerText: {
+    marginTop: 6,
+    fontSize: 14,
+    color: '#27ae60',
+    fontStyle: 'italic',
+  },
+
 
   footer: { paddingHorizontal: 16, paddingVertical: 16 },
   submitBtn: { backgroundColor: '#27ae60', borderRadius: 10, alignItems: 'center', paddingVertical: 12 },
