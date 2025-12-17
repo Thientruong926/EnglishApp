@@ -51,6 +51,8 @@ const EditLessonScreen = () => {
         exercises: exercisesFromContext,
         fetchExercisesByLesson,
         addExercise,
+        updateExercise,
+        deleteExercise,
     } = useExercise();
 
     const [vocabularies, setVocabularies] = useState<Vocabulary[]>([]);
@@ -149,45 +151,45 @@ const EditLessonScreen = () => {
         }
     };
 
-const addExerciseToList = async () => {
-    if (!id) return;
-    if (!question.trim() || !correctAnswer.trim()) {
-        Alert.alert("Lỗi", "Thiếu câu hỏi hoặc đáp án đúng");
-        return;
-    }
-
-    const payload = {
-        question: question.trim(),
-        type,
-        options:
-            type === "multiple-choice"
-                ? [optionA, optionB, optionC, optionD].filter(Boolean)
-                : undefined,
-        correct_answer: correctAnswer.trim(),
-    };
-
-    if (editingExerciseIndex !== null) {
-        // đang chỉnh sửa
-        const exerciseToEdit = exercises[editingExerciseIndex];
-        const ok = await updateExercise(exerciseToEdit._id, payload);
-        if (ok) {
-            setExercises(prev =>
-                prev.map((e, idx) =>
-                    idx === editingExerciseIndex ? { ...e, ...payload } : e
-                )
-            );
-            resetExerciseForm();
-        } else {
-            Alert.alert('Lỗi', 'Không thể cập nhật bài tập');
+    const addExerciseToList = async () => {
+        if (!id) return;
+        if (!question.trim() || !correctAnswer.trim()) {
+            Alert.alert("Lỗi", "Thiếu câu hỏi hoặc đáp án đúng");
+            return;
         }
-    } else {
-        // thêm mới
-        const exercise = await addExercise(id, payload);
-        if (!exercise) return;
-        setExercises(prev => [...prev, exercise]);
-        resetExerciseForm();
-    }
-};
+
+        const payload = {
+            question: question.trim(),
+            type,
+            options:
+                type === "multiple-choice"
+                    ? [optionA, optionB, optionC, optionD].filter(Boolean)
+                    : undefined,
+            correct_answer: correctAnswer.trim(),
+        };
+
+        if (editingExerciseIndex !== null) {
+            // đang chỉnh sửa
+            const exerciseToEdit = exercises[editingExerciseIndex];
+            const ok = await updateExercise(exerciseToEdit._id, payload);
+            if (ok) {
+                setExercises(prev =>
+                    prev.map((e, idx) =>
+                        idx === editingExerciseIndex ? { ...e, ...payload } : e
+                    )
+                );
+                resetExerciseForm();
+            } else {
+                Alert.alert('Lỗi', 'Không thể cập nhật bài tập');
+            }
+        } else {
+            // thêm mới
+            const exercise = await addExercise(id, payload);
+            if (!exercise) return;
+            setExercises(prev => [...prev, exercise]);
+            resetExerciseForm();
+        }
+    };
 
     const handleEditVocab = (index: number) => {
         const vocab = vocabularies[index];
@@ -214,33 +216,31 @@ const addExerciseToList = async () => {
         setEditingExerciseIndex(index);
     };
 
-const { deleteExercise, updateExercise } = useExercise();
+    const handleDeleteExercise = async (index: number) => {
+        const exercise = exercises[index];
+        if (!exercise) return;
 
-const handleDeleteExercise = async (index: number) => {
-    const exercise = exercises[index];
-    if (!exercise) return;
-
-    Alert.alert(
-        'Xác nhận',
-        'Bạn có chắc muốn xóa bài tập này?',
-        [
-            { text: 'Hủy', style: 'cancel' },
-            {
-                text: 'Xóa',
-                style: 'destructive',
-                onPress: async () => {
-                    const ok = await deleteExercise(exercise._id);
-                    if (ok) {
-                        setExercises(prev => prev.filter((_, idx) => idx !== index));
-                        resetExerciseForm();
-                    } else {
-                        Alert.alert('Lỗi', 'Không thể xóa bài tập');
+        Alert.alert(
+            'Xác nhận',
+            'Bạn có chắc muốn xóa bài tập này?',
+            [
+                { text: 'Hủy', style: 'cancel' },
+                {
+                    text: 'Xóa',
+                    style: 'destructive',
+                    onPress: async () => {
+                        const ok = await deleteExercise(exercise._id);
+                        if (ok) {
+                            setExercises(prev => prev.filter((_, idx) => idx !== index));
+                            resetExerciseForm();
+                        } else {
+                            Alert.alert('Lỗi', 'Không thể xóa bài tập');
+                        }
                     }
                 }
-            }
-        ]
-    );
-};
+            ]
+        );
+    };
 
     const handleUpdateLesson = async () => {
         if (!title.trim() || !topic.trim() || !content.trim()) {
@@ -430,25 +430,29 @@ const handleDeleteExercise = async (index: number) => {
                 {exercises.length > 0 && (
                     <View style={styles.listBox}>
                         <Text style={styles.listTitle}>Danh sách bài tập ({exercises.length})</Text>
-                        {exercises.map((e, idx) => (
-                            <View key={`e-${idx}`} style={styles.listItemCard}>
-                                <View style={styles.listItemContent}>
-                                    <Text style={styles.listItemText}>
-                                        <Text style={styles.listItemWord}>{e.question}</Text>
-                                        {`\nLoại: ${e.type} | Đáp án: ${e.correct_answer}`}
-                                        {e.options?.length ? `\n🔹 ${e.options.join(' | ')}` : ''}
-                                    </Text>
+                        {exercises.map((e, idx) => {
+                            // Debug: Log dữ liệu exercise
+                            console.log(`Exercise ${idx}:`, e);
+                            return (
+                                <View key={`e-${idx}`} style={styles.listItemCard}>
+                                    <View style={styles.listItemContent}>
+                                        <Text style={styles.listItemText}>
+                                            <Text style={styles.listItemWord}>{e?.question || 'Không có câu hỏi'}</Text>
+                                            {`\nLoại: ${e?.type || 'undefined'} | Đáp án: ${e?.correct_answer || 'undefined'}`}
+                                            {e?.options?.length ? `\n🔹 ${e.options.join(' | ')}` : ''}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.listItemActions}>
+                                        <TouchableOpacity style={styles.editIconBtn} onPress={() => handleEditExercise(idx)} disabled={saving}>
+                                            <Ionicons name="pencil" size={16} color="#f39c12" />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={styles.deleteIconBtn} onPress={() => handleDeleteExercise(idx)} disabled={saving}>
+                                            <Ionicons name="trash" size={16} color="#e74c3c" />
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
-                                <View style={styles.listItemActions}>
-                                    <TouchableOpacity style={styles.editIconBtn} onPress={() => handleEditExercise(idx)} disabled={saving}>
-                                        <Ionicons name="pencil" size={16} color="#f39c12" />
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.deleteIconBtn} onPress={() => handleDeleteExercise(idx)} disabled={saving}>
-                                        <Ionicons name="trash" size={16} color="#e74c3c" />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        ))}
+                            );
+                        })}
                     </View>
                 )}
 

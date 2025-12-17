@@ -97,8 +97,10 @@ export const ExerciseProvider = ({ children }: { children: ReactNode }) => {
         throw new Error(data.message || "Thêm bài tập thất bại");
       }
 
-      setExercises(prev => [...prev, data]);
-      return data;
+      // Backend trả về { message, exercise }
+      const exercise = data.exercise || data;
+      setExercises(prev => [...prev, exercise]);
+      return exercise;
     } catch (err: any) {
       Alert.alert("Lỗi", err.message);
       return null;
