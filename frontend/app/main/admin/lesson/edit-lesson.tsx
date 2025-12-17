@@ -158,6 +158,23 @@ const EditLessonScreen = () => {
             return;
         }
 
+        // Validate đáp án đúng cho trắc nghiệm
+        if (type === "multiple-choice") {
+            const answer = correctAnswer.trim().toUpperCase();
+            if (!['A', 'B', 'C', 'D'].includes(answer)) {
+                Alert.alert("Lỗi", "Đáp án đúng phải là A, B, C, hoặc D");
+                return;
+            }
+        }
+
+        // Validate câu hỏi cho bài điền từ
+        if (type === "fill-in") {
+            if (!question.includes('_')) {
+                Alert.alert("Lỗi", "Câu hỏi điền từ phải chứa gạch chân (_) để chỉ vị trí từ cần điền\nVí dụ: The _ is blue (word: sky)");
+                return;
+            }
+        }
+
         const payload = {
             question: question.trim(),
             type,
@@ -402,10 +419,12 @@ const EditLessonScreen = () => {
 
                 <TextInput
                     style={styles.input}
-                    placeholder="Câu hỏi"
+                    placeholder={type === 'fill-in' ? "Câu hỏi (dùng _ để chỉ vị trí từ cần điền. Ví dụ: The _ is blue)" : "Câu hỏi"}
                     value={question}
                     onChangeText={setQuestion}
                     editable={!saving}
+                    multiline
+                    numberOfLines={2}
                 />
 
                 {type === 'multiple-choice' && (
@@ -419,7 +438,19 @@ const EditLessonScreen = () => {
                 )}
 
                 <Text style={styles.label}>Đáp án đúng *</Text>
-                <TextInput style={styles.input} placeholder="Ví dụ: A hoặc từ khoá" value={correctAnswer} onChangeText={setCorrectAnswer} editable={!saving} />
+                <TextInput 
+                    style={styles.input} 
+                    placeholder={type === 'multiple-choice' ? "Nhập A, B, C hoặc D" : "Nhập từ đáp án (phải khớp với từ trong _ của câu hỏi)"} 
+                    value={correctAnswer} 
+                    onChangeText={setCorrectAnswer} 
+                    editable={!saving}
+                    autoCapitalize={type === 'multiple-choice' ? 'characters' : 'none'}
+                />
+                {type === 'fill-in' && (
+                    <Text style={styles.helperText}>
+                        💡 Ví dụ: Nếu câu hỏi là "The _ is blue", đáp án là "sky"
+                    </Text>
+                )}
 
                 <TouchableOpacity style={styles.smallButton} onPress={addExerciseToList} disabled={saving}>
                     <Text style={styles.smallButtonText}>
@@ -645,6 +676,13 @@ const styles = StyleSheet.create({
     },
     typeTextActive: {
         color: '#2980b9',
+    },
+    helperText: {
+        fontSize: 12,
+        color: '#e67e22',
+        marginTop: 6,
+        marginLeft: 4,
+        fontStyle: 'italic',
     },
 });
 
