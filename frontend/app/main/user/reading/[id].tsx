@@ -33,7 +33,6 @@ export default function ReadingDetail() {
   const [vocabs, setVocabs] = useState<Vocabulary[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [canStartExercise, setCanStartExercise] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [selectionPoint, setSelectionPoint] = useState<{ x: number; y: number; initialScrollY: number } | null>(null);
@@ -77,13 +76,8 @@ export default function ReadingDetail() {
   }, [id, allVocabs, user_id]);
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+    const { contentOffset } = e.nativeEvent;
     setScrollY(contentOffset.y);
-
-    const threshold = 24;
-    if (contentOffset.y + layoutMeasurement.height >= contentSize.height - threshold) {
-      setCanStartExercise(true);
-    }
   };
 
   // Highlight từ trong đoạn văn
@@ -242,13 +236,10 @@ export default function ReadingDetail() {
 
         <View style={styles.footer}>
           <TouchableOpacity
-            disabled={!canStartExercise}
-            style={[styles.ctaBtn, !canStartExercise && styles.ctaBtnDisabled]}
+            style={styles.ctaBtn}
             onPress={() => router.push(`/main/user/exercise/${lesson._id}`)}
           >
-            <Text style={styles.ctaText}>
-              {canStartExercise ? 'Làm bài tập' : 'Kéo xuống hết để làm bài'}
-            </Text>
+            <Text style={styles.ctaText}>Làm bài tập</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
